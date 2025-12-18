@@ -1,0 +1,26 @@
+{
+  "minecraft": {
+    "host": "localhost",
+    "port": 12345,
+    "username": "Alice",
+    "version": "1.21.8"
+  },
+  "backend": {
+    "host": "localhost",
+    "port": 8000,
+    "api_url": "http://localhost:8000/api",
+    "ws_url": "ws://localhost:8000/ws"
+  },
+  "gpt": {
+    "api_key": "sk-9GWkjOf1MOqzkY6RF567217994Fe494bB02eF99c241b42Dd",
+    "base_url": "https://api.vveai.com/v1",
+    "model": "gpt-4o-mini",
+    "temperature": 0.7,
+    "max_tokens": 10000
+  },
+  "bot": {
+    "response_timeout": 30,
+    "max_retries": 3,
+    "debug_mode": true
+  }
+}

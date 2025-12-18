@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "mineflayer": "^4.33.0"
+    "mineflayer": "^4.33.0",
+    "mineflayer-pathfinder": "^2.4.0",
+    "axios": "^1.6.0",
+    "ws": "^8.14.0"
   }
 }
