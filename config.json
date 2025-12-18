@@ -1,9 +1,10 @@
 {
   "minecraft": {
     "host": "localhost",
-    "port": 12345,
-    "username": "Alice",
-    "version": "1.21.8"
+    "port": 12334,
+    "username": "shy2757539057@163.com",
+    "version": "1.20.1",
+    "auth": "microsoft"
   },
   "backend": {
     "host": "localhost",
@@ -22,5 +23,6 @@
     "response_timeout": 30,
     "max_retries": 3,
     "debug_mode": true
-  }
+  },
+  "name":"Alice"
 }

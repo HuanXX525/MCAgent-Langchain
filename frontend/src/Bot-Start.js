@@ -4,10 +4,12 @@ const { loadConfig } = require('./config');
 const SkillManager = require('./skillManager');
 const APIClient = require('./apiClient');
 
+
 // 加载配置
 const config = loadConfig();
 console.log('配置已加载');
-
+// 在游戏里的称呼
+callName = config.name
 // 创建机器人
 const bot = mineflayer.createBot(config.minecraft);
 
@@ -54,7 +56,7 @@ bot.on("chat", async (username, message) => {
   if (username === bot.username) return;
 
   // 检查消息中是否包含 @机器人用户名（不区分大小写）
-  const mentionPattern = new RegExp(`@${bot.username}`, "i");
+  const mentionPattern = new RegExp(`@${callName}`, "i");
   if (mentionPattern.test(message)) {
     // 提取用户消息
     const userMessage = message.replace(mentionPattern, "").trim() || "你好";
