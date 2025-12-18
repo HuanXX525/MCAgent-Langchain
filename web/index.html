@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Bot 配置面板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 26px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Minecraft Bot 配置面板</h1>
+            <p>配置你的AI机器人，让它在Minecraft世界中自由行动</p>
+        </div>
+
+        <div class="content">
+            <form id="configForm">
+                <div class="section">
+                    <div class="section-title">⚙️ Minecraft 服务器配置</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mc-host">服务器地址</label>
+                            <input type="text" id="mc-host" name="minecraft.host" placeholder="localhost">
+                        </div>
+                        <div class="form-group">
+                            <label for="mc-port">端口</label>
+                            <input type="number" id="mc-port" name="minecraft.port" placeholder="25565">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mc-username">用户名/邮箱</label>
+                            <input type="text" id="mc-username" name="minecraft.username" placeholder="机器人用户名">
+                        </div>
+                        <div class="form-group">
+                            <label for="mc-version">游戏版本</label>
+                            <input type="text" id="mc-version" name="minecraft.version" placeholder="1.20.1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mc-auth">认证方式</label>
+                        <select id="mc-auth" name="minecraft.auth">
+                            <option value="offline">离线模式 (offline)</option>
+                            <option value="microsoft">微软账号 (microsoft)</option>
+                            <option value="mojang">Mojang账号 (mojang)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bot-name">机器人名称</label>
+                        <input type="text" id="bot-name" name="name" placeholder="Alice">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🤖 后端服务配置</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="backend-host">后端地址</label>
+                            <input type="text" id="backend-host" name="backend.host" placeholder="localhost">
+                        </div>
+                        <div class="form-group">
+                            <label for="backend-port">后端端口</label>
+                            <input type="number" id="backend-port" name="backend.port" placeholder="8000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🧠 GPT API 配置</div>
+                    <div class="form-group">
+                        <label for="gpt-api-key">API Key</label>
+                        <input type="password" id="gpt-api-key" name="gpt.api_key" placeholder="sk-...">
+                    </div>
+                    <div class="form-group">
+                        <label for="gpt-base-url">API Base URL</label>
+                        <input type="text" id="gpt-base-url" name="gpt.base_url" placeholder="https://api.openai.com/v1">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gpt-model">模型</label>
+                            <input type="text" id="gpt-model" name="gpt.model" placeholder="gpt-4o-mini">
+                        </div>
+                        <div class="form-group">
+                            <label for="gpt-temperature">Temperature (0-2)</label>
+                            <input type="number" id="gpt-temperature" name="gpt.temperature" step="0.1" min="0" max="2" placeholder="0.7">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="gpt-max-tokens">Max Tokens</label>
+                        <input type="number" id="gpt-max-tokens" name="gpt.max_tokens" placeholder="10000">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🔧 机器人设置</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bot-timeout">响应超时 (秒)</label>
+                            <input type="number" id="bot-timeout" name="bot.response_timeout" placeholder="30">
+                        </div>
+                        <div class="form-group">
+                            <label for="bot-retries">最大重试次数</label>
+                            <input type="number" id="bot-retries" name="bot.max_retries" placeholder="3">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-group">
+                            <label for="bot-debug">调试模式</label>
+                            <label class="toggle">
+                                <input type="checkbox" id="bot-debug" name="bot.debug_mode">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button type="button" class="btn btn-secondary" onclick="loadConfig()">🔄 重新加载</button>
+                    <button type="submit" class="btn btn-primary">💾 保存配置</button>
+                </div>
+
+                <div id="status" class="status"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+</body>
+</html>

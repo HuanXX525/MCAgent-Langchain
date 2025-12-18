@@ -1,7 +1,10 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 import asyncio
+import json
+import os
 
 from config import CONFIG
 from models import ChatRequest, ChatResponse
@@ -40,6 +43,28 @@ async def startup_event():
         print(f"Agent初始化失败: {e}")
         import traceback
         traceback.print_exc()
+
+@app.get("/api/config")
+async def get_config():
+    """获取当前配置"""
+    try:
+        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.json')
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        return config
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/api/config")
+async def save_config(config: dict):
+    """保存配置"""
+    try:
+        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.json')
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        return {"success": True, "message": "配置已保存"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
@@ -89,18 +114,9 @@ async def status():
         "model": CONFIG['gpt']['model']
     }
 
-@app.get("/")
-async def root():
-    """根路径"""
-    return {
-        "message": "Minecraft Bot Backend API",
-        "version": "1.0.0",
-        "endpoints": {
-            "chat": "/api/chat",
-            "websocket": "/ws",
-            "status": "/api/status"
-        }
-    }
+web_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'web')
+if os.path.exists(web_path):
+    app.mount("/", StaticFiles(directory=web_path, html=True), name="web")
 
 if __name__ == "__main__":
     port = CONFIG['backend']['port']

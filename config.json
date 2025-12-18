@@ -6,6 +6,7 @@
     "version": "1.20.1",
     "auth": "microsoft"
   },
+  "name": "Alice",
   "backend": {
     "host": "localhost",
     "port": 8000,
@@ -23,6 +24,5 @@
     "response_timeout": 30,
     "max_retries": 3,
     "debug_mode": true
-  },
-  "name":"Alice"
+  }
 }
