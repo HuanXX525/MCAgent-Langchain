@@ -9,3 +9,7 @@ def load_config() -> Dict[str, Any]:
         return json.load(f)
 
 CONFIG = load_config()
+
+API_KEY = CONFIG['gpt']['api_key']
+BASE_URL = CONFIG['gpt']['base_url']
+MODEL = CONFIG['gpt']['model']

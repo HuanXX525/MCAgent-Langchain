@@ -5,17 +5,19 @@ const SkillManager = require('./skillManager');
 const APIClient = require('./apiClient');
 
 
-// 加载配置
+// 1. 加载配置
 const config = loadConfig();
 console.log('配置已加载');
-// 在游戏里的称呼
-callName = config.name
-// 创建机器人
+
+// 2. 创建机器人
 const bot = mineflayer.createBot(config.minecraft);
+console.log("伙伴已创建");
 
-// 加载pathfinder插件
+// 3. 加载pathfinder插件
 bot.loadPlugin(pathfinder);
+console.log("插件加载完成")
 
+// 4. 变量声明
 let skillManager;
 let apiClient;
 
@@ -23,11 +25,10 @@ let apiClient;
 async function processUserMessage(username, message) {
   try {
     // 发送到后端处理
+    // console.log("处理消息")
     const response = await apiClient.sendMessage(username, message);
-    return response.reply || "我正在处理你的请求...";
   } catch (error) {
     console.error('处理消息失败:', error.message);
-    return "抱歉，我遇到了一些问题，请稍后再试...";
   }
 }
 
@@ -54,20 +55,15 @@ bot.on('login', () => {
 bot.on("chat", async (username, message) => {
   // 忽略机器人自己的消息
   if (username === bot.username) return;
-
+  // console.log(`收到来自 ${username} 的消息: "${message}"`);
   // 检查消息中是否包含 @机器人用户名（不区分大小写）
-  const mentionPattern = new RegExp(`@${callName}`, "i");
+  const mentionPattern = new RegExp(`@${config.name}`, "i");
   if (mentionPattern.test(message)) {
     // 提取用户消息
     const userMessage = message.replace(mentionPattern, "").trim() || "你好";
-    
-    console.log(`收到来自 ${username} 的消息: ${userMessage}`);
-    
     // 处理消息
-    const reply = await processUserMessage(username, userMessage);
-    
-    // 回复
-    bot.chat(`@${username} ${reply}`);
+    // console.log(`收到来自 ${username} 的消息: "${userMessage}"`);
+    await processUserMessage(username, userMessage);
   }
 });
 
@@ -88,4 +84,3 @@ bot.on('end', (reason) => {
     apiClient.disconnect();
   }
 });
-
