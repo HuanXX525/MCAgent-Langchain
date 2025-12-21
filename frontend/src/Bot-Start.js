@@ -1,5 +1,5 @@
 const mineflayer = require("mineflayer");
-const { pathfinder, Movements } = require('mineflayer-pathfinder');
+const { pathfinder, Movements, goals } = require("mineflayer-pathfinder");
 const { loadConfig } = require('./config');
 const SkillManager = require('./skillManager');
 const APIClient = require('./apiClient');

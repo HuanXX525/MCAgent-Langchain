@@ -7,6 +7,7 @@ from shared import logger, get_minecraft_agent, get_connection_manager
 
 class WebSockekProtocol(enum.Enum):
     CHAT = "chat"
+    ACTION = "action"
     DEFAULT = "default"
 
 class ConnectionManager:
@@ -31,45 +32,9 @@ class ConnectionManager:
         logger.info(f"有客户端断开连接-当前总连接数: {len(self.active_connections)}")
         
 
-    async def wait_for_action_result(self, action: Dict[str, Any], timeout: float = 30.0) -> Dict[str, Any]:
-        """等待行动执行结果"""
-        action_id = f"{action['skill']}.{action['method']}"
-        
-        try:
-            # 等待结果事件
-            await asyncio.wait_for(self.result_events[action_id].wait(), timeout=timeout)
-            
-            # 获取并清理结果
-            result = self.action_results.pop(action_id, None)
-            self.result_events.pop(action_id, None)
-            
-            return result
-        except asyncio.TimeoutError:
-            print(f"等待行动结果超时: {action_id}")
-            self.result_events.pop(action_id, None)
-            return {
-                "success": False,
-                "action": action,
-                "error": "执行超时"
-            }
 
-    async def send_action(self, action: Dict[str, Any]):
-            """发送行动指令到前端"""
-            message = {
-                "type": "execute_action",
-                "data": action
-            }
-            
-            # 为这个action创建一个等待事件
-            action_id = f"{action['skill']}.{action['method']}"
-            self.result_events[action_id] = asyncio.Event()
-            
-            for connection in self.active_connections:
-                try:
-                    await connection.send_json(message)
-                    print(f"已发送行动指令: {action_id}")
-                except Exception as e:
-                    print(f"发送行动指令失败: {e}")
+
+
 async def send_chat(text: str, webSocket: WebSocket):
     """发送聊天消息到前端"""
     message = {
