@@ -13,3 +13,5 @@ CONFIG = load_config()
 API_KEY = CONFIG['gpt']['api_key']
 BASE_URL = CONFIG['gpt']['base_url']
 MODEL = CONFIG['gpt']['model']
+
+DB_URL = f"{CONFIG['db']['db']}://{CONFIG['db']['user']}:{CONFIG['db']['password']}@{CONFIG['db']['host']}:{CONFIG['db']['port']}/{CONFIG['db']['database']}"

@@ -7,11 +7,20 @@
     "auth": "microsoft"
   },
   "name": "Alice",
+  "saveslot": "default_save_slot",
   "backend": {
     "host": "localhost",
     "port": 8000,
     "api_url": "http://localhost:8000/api",
     "ws_url": "ws://localhost:8000/ws"
+  },
+  "db":{
+    "db":"postgresql",
+    "user":"postgres",
+    "password":"123456",
+    "host":"localhost",
+    "port":"5432",
+    "database":"postgres"
   },
   "gpt": {
     "api_key": "sk-9GWkjOf1MOqzkY6RF567217994Fe494bB02eF99c241b42Dd",
