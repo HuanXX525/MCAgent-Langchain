@@ -1,16 +1,12 @@
 from contextlib import asynccontextmanager
-import logging
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import uvicorn
-import asyncio
 import json
 import os
 
 from config import CONFIG, DB_URL
-from models import ChatRequest, ChatResponse
-from api.chat import process_chat_message, set_agent
 from api.websocket import ConnectionManager
 from agent.conversational import MinecraftAgent
 from shared import (logger, initialize_logger, set_minecraft_agent, 
@@ -30,7 +26,6 @@ with PostgresSaver.from_conn_string(DB_URL) as checkpointer:
             # 创建并设置Agent实例
             agent = MinecraftAgent(checkpointer=checkpointer)
             set_minecraft_agent(agent)
-            set_agent(agent)
             
             # 创建并设置WebSocket连接管理器
             connection_manager = ConnectionManager()

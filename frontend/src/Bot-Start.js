@@ -1,7 +1,6 @@
 const mineflayer = require("mineflayer");
 const { pathfinder, Movements, goals } = require("mineflayer-pathfinder");
 const { loadConfig } = require('./config');
-const SkillManager = require('./skillManager');
 const APIClient = require('./apiClient');
 
 
@@ -18,7 +17,6 @@ bot.loadPlugin(pathfinder);
 console.log("插件加载完成")
 
 // 4. 变量声明
-let skillManager;
 let apiClient;
 
 // 处理用户消息
@@ -41,12 +39,8 @@ bot.on('login', () => {
   const defaultMove = new Movements(bot, mcData);
   bot.pathfinder.setMovements(defaultMove);
   
-  // 初始化技能管理器
-  skillManager = new SkillManager(bot);
-  console.log('技能系统已加载');
-  
   // 初始化API客户端
-  apiClient = new APIClient(config, bot, skillManager);
+  apiClient = new APIClient(config, bot);
   apiClient.connectWebSocket();
   console.log('正在连接后端...');
 });

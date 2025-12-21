@@ -2,10 +2,9 @@ const axios = require('axios');
 const WebSocket = require('ws');
 
 class APIClient {
-  constructor(config, bot, skillManager) {
+  constructor(config, bot) {
     this.config = config;
     this.bot = bot;
-    this.skillManager = skillManager;
     this.apiUrl = config.backend.api_url;
     this.wsUrl = config.backend.ws_url;
     this.ws = null;
@@ -14,6 +13,7 @@ class APIClient {
   }
 
   async sendMessage(username, message) {
+    // 向后端发送玩家消息，也就是玩家通过我的世界聊天框输入的文本
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       console.error("WebSocket 未连接，无法发送消息");
       throw new Error("WebSocket 连接未就绪");
@@ -75,69 +75,18 @@ class APIClient {
   }
 
   async handleWebSocketMessage(message) {
+    // 在这里处理从后端接收到的消息
     console.log("收到WebSocket消息:", message.type);
 
     switch (message.type) {
       case "chat":
+        // 聊天消息，转发给玩家，在我的世界聊天框显示出来
         this.bot.chat(message.data.message)
         break;
-      case "execute_action":
-        await this.executeAction(message.data);
-        break;
-      case "chat_response":
-        this.bot.chat(message.data.text);
-        break;
-      case "ping":
-        this.sendPong();
-        break;
+      
+      // 其他的行为控制信息获取请求等等，可以在这里处理
       default:
         console.log("未知消息类型:", message.type);
-    }
-  }
-
-  async executeAction(action) {
-    console.log(`执行行动: ${action.skill}.${action.method}`, action.params);
-
-    try {
-      const result = await this.skillManager.executeSkill(
-        action.skill,
-        action.method,
-        action.params
-      );
-
-      this.sendActionResult({
-        success: true,
-        action: action,
-        result: result,
-      });
-    } catch (error) {
-      console.error("执行行动失败:", error);
-      this.sendActionResult({
-        success: false,
-        action: action,
-        error: error.message,
-      });
-    }
-  }
-
-  sendActionResult(result) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(
-        JSON.stringify({
-          type: "action_result",
-          data: result,
-        })
-      );
-    }
-  }
-
-  sendPong() {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(
-        JSON.stringify({
-          type: "pong",
-        })
-      );
     }
   }
 
