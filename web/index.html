@@ -258,6 +258,10 @@
                         <label for="bot-name">机器人名称</label>
                         <input type="text" id="bot-name" name="name" placeholder="Alice">
                     </div>
+                    <div class="form-group">
+                        <label for="saveslot">存档槽位</label>
+                        <input type="text" id="saveslot" name="saveslot" placeholder="default_save_slot">
+                    </div>
                 </div>
 
                 <div class="section">
@@ -297,6 +301,45 @@
                     <div class="form-group">
                         <label for="gpt-max-tokens">Max Tokens</label>
                         <input type="number" id="gpt-max-tokens" name="gpt.max_tokens" placeholder="10000">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🗄️ 数据库配置</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="db-type">数据库类型</label>
+                            <select id="db-type" name="db.db">
+                                <option value="postgresql">PostgreSQL</option>
+                                <option value="mysql">MySQL</option>
+                                <option value="sqlite">SQLite</option>
+                                <option value="mongodb">MongoDB</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="db-user">用户名</label>
+                            <input type="text" id="db-user" name="db.user" placeholder="postgres">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="db-password">密码</label>
+                            <input type="password" id="db-password" name="db.password" placeholder="数据库密码">
+                        </div>
+                        <div class="form-group">
+                            <label for="db-host">主机地址</label>
+                            <input type="text" id="db-host" name="db.host" placeholder="localhost">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="db-port">端口</label>
+                            <input type="number" id="db-port" name="db.port" placeholder="5432">
+                        </div>
+                        <div class="form-group">
+                            <label for="db-name">数据库名称</label>
+                            <input type="text" id="db-name" name="db.database" placeholder="postgres">
+                        </div>
                     </div>
                 </div>
 
