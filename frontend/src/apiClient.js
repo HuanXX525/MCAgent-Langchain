@@ -1,8 +1,13 @@
 const axios = require('axios');
 const WebSocket = require('ws');
-
+const ActionManager = require('./action/actionManager')
 class APIClient {
+  static instance = null;
   constructor(config, bot) {
+    if (APIClient.instance) {
+      return APIClient.instance;
+    }
+    APIClient.instance = this;
     this.config = config;
     this.bot = bot;
     this.apiUrl = config.backend.api_url;
@@ -83,6 +88,9 @@ class APIClient {
         // 聊天消息，转发给玩家，在我的世界聊天框显示出来
         this.bot.chat(message.data.message)
         break;
+      case "action":
+        const data = message.data;
+        ActionManager.instance.executeAction(data.action, data.action_id, data.args);
       
       // 其他的行为控制信息获取请求等等，可以在这里处理
       default:

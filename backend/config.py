@@ -16,3 +16,6 @@ BASE_URL = CONFIG['gpt']['base_url']
 MODEL = CONFIG['gpt']['model']
 
 DB_URL = f"{CONFIG['db']['db']}://{CONFIG['db']['user']}:{CONFIG['db']['password']}@{CONFIG['db']['host']}:{CONFIG['db']['port']}/{CONFIG['db']['database']}"
+
+SAVE_SLOT = CONFIG['saveslot']
+BOTNAME = CONFIG['name']

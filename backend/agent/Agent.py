@@ -1,21 +1,48 @@
 from fastapi import WebSocket
 from langchain_openai import ChatOpenAI
 from typing import Any
-from api.websocket import ConnectionManager, send_chat
-from config import API_KEY, BASE_URL, MODEL
+# from api.websocket import send_chat
+from langgraph.checkpoint.postgres import PostgresSaver 
 from typing import Any
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
-from .AgentTools import tools
 from langchain.messages import AIMessage, HumanMessage
-from langgraph.checkpoint.postgres import PostgresSaver 
 
-websocket_manager = ConnectionManager()
+
+from .AgentTools import Context, tools
+
+from config import API_KEY, BASE_URL, BOTNAME, MODEL, SAVE_SLOT
+from typing import Any
+from fastapi import WebSocket
+
+from api.WebSockekProtocol import WebSockekProtocol
+from logger import logger
+
+
+
+async def send_chat(text: str, webSocket: WebSocket):
+    """发送聊天消息到前端"""
+    message = {
+        "type": WebSockekProtocol.CHAT.value,
+        "data": {
+            "message": text
+        }
+    }
+
+    try:
+        await webSocket.send_json(message)
+    except Exception as e:
+        logger.warning(f"发送聊天消息失败: {e}")
+
+
+
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+
 
 class MinecraftAgent:
     """Minecraft游戏AI Agent"""
     
-    def __init__(self, checkpointer:PostgresSaver):
+    def __init__(self, checkpointer:AsyncPostgresSaver):
         # self.websocket_manager = websocket_manager
         self.model = ChatOpenAI(
             model=MODEL,
@@ -37,6 +64,7 @@ class MinecraftAgent:
         :param chunk: 顾名思义
         :type chunk: str | Any
         '''
+        # from api.websocket import send_chat
         if stream_mode == "custom":
             _ = await send_chat(chunk, web_socket)
             # send_ai_message(chunk)
@@ -57,13 +85,24 @@ class MinecraftAgent:
         try:
             # 使用用户名作为thread_id来区分不同用户的对话
             config = {"configurable": {"thread_id": username}}
-            for stream_mode, chunk in self.agent.stream(
+            async for stream_mode, chunk in self.agent.astream(
                 {"messages": [HumanMessage(content=f"{username}: {message}")]}, 
-                config={"configurable":{"thread_id": "saveslot"}},
-                stream_mode=["custom", "updates"]):
+                config={"configurable":{"thread_id": SAVE_SLOT + BOTNAME}},
+                stream_mode=["custom", "updates"],
+                context=Context(websocket=websocket, player_name=username)):
                 _ = await self.process_stream_chunk(stream_mode, chunk, websocket)
         except Exception as e:
             print(f"Agent处理过程中出现错误: {e}")
             import traceback
             traceback.print_exc()
             return f"抱歉，处理请求时出错：{str(e)}"
+
+minecraftAgent = None
+
+def set_minecraft_agent(new_agent: MinecraftAgent):
+    global minecraftAgent
+    minecraftAgent = new_agent
+
+def get_minecraft_agent():
+    global minecraftAgent
+    return minecraftAgent
