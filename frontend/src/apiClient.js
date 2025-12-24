@@ -3,14 +3,13 @@ const WebSocket = require('ws');
 const { EventEmitter } = require('events'); // 引入 Node.js 原生事件触发器
 class APIClient extends EventEmitter {
   static instance = null;
-  constructor(config, bot) {
+  constructor(config) {
     super();
     if (APIClient.instance) {
       return APIClient.instance;
     }
     APIClient.instance = this;
     this.config = config;
-    this.bot = bot;
     this.apiUrl = config.backend.api_url;
     this.wsUrl = config.backend.ws_url;
     this.ws = null;
@@ -87,7 +86,7 @@ class APIClient extends EventEmitter {
     switch (message.type) {
       case "chat":
         // 聊天消息，转发给玩家，在我的世界聊天框显示出来
-        this.bot.chat(message.data.message);
+        global.bot.chat(message.data.message);
         break;
       case "action":
         // 【关键改动】不再直接调用 ActionManager
@@ -103,6 +102,9 @@ class APIClient extends EventEmitter {
   // 统一的发送方法
   send(payload) {
     console.log("进入发送方法")
+    console.log("WebSocket状态:", this.ws.readyState);
+    console.log(this.ws.url);
+    // console.log("WebSocket对象:", this.ws);
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       console.log("发送数据:", payload);
       this.ws.send(JSON.stringify(payload));

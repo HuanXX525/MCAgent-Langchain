@@ -134,10 +134,6 @@ async def save_config(config: dict):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    """WebSocket连接端点"""
-    # from api.websocket import handle_websocket_data
-    
-    # 获取连接管理器
     connection_manager = get_connection_manager()
     if not connection_manager:
         logger.error("WebSocket连接管理器未初始化")
@@ -146,8 +142,14 @@ async def websocket_endpoint(websocket: WebSocket):
     await connection_manager.connect(websocket)
     try:
         while True:
+            # 1. 接收数据
             data = await websocket.receive_json()
-            await handle_websocket_data(data, websocket)
+            
+            # 2. 【核心修复】使用 create_task 异步处理
+            # 这样 handle_websocket_data 不会阻塞当前的循环
+            # 循环会立即回到上面的 receive_json() 等待前端的回执
+            asyncio.create_task(handle_websocket_data(data, websocket))
+            
     except WebSocketDisconnect:
         connection_manager.disconnect(websocket)
     except Exception as e:

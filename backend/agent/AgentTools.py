@@ -44,9 +44,12 @@ async def send_tool_args(reply: str, args:dict, action_name:str, context: Contex
         }
         '''
         result = await asyncio.wait_for(future, timeout=120)
-        # logger.info(f"工具返回结果：{result}")
-        if result.get("message", False):
-            return result.message
+
+        # 修复处：使用 .get() 访问字典键值
+        msg_content = result.get("message")
+
+        if msg_content: 
+            return msg_content
         else:
             return "工具反馈失败"
     except asyncio.TimeoutError:

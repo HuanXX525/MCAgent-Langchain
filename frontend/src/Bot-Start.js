@@ -17,13 +17,12 @@ bot.loadPlugin(pathfinder);
 console.log("插件加载完成");
 
 // 4. 变量声明
-let apiClient;
+const apiClient = new APIClient(config);
+
 
 // 处理用户消息
 async function processUserMessage(username, message) {
   try {
-    // 发送到后端处理
-    // console.log("处理消息")
     const response = await apiClient.sendMessage(username, message);
   } catch (error) {
     console.error("处理消息失败:", error.message);
@@ -33,14 +32,10 @@ async function processUserMessage(username, message) {
 // 登录事件
 bot.on("login", () => {
   console.log("机器人已登录");
-
   // 初始化pathfinder movements
   const mcData = require("minecraft-data")(bot.version);
   const defaultMove = new Movements(bot, mcData);
   bot.pathfinder.setMovements(defaultMove);
-
-  // 初始化API客户端
-  apiClient = new APIClient(config, bot);
   // 在这里定义勾子逻辑
   apiClient.on("onAction", async (data) => {
     console.log("钩子触发：准备执行工具", data.action);
