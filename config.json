@@ -3,7 +3,7 @@
     "host": "localhost",
     "port": 12334,
     "username": "shy2757539057@163.com",
-    "auth": "microsoft"
+    "auth": "offline"
   },
   "name": "Alice",
   "saveslot": "default_save_slot",
@@ -13,20 +13,20 @@
     "api_url": "http://localhost:8000/api",
     "ws_url": "ws://localhost:8000/ws"
   },
-  "db":{
-    "db":"postgresql",
-    "user":"postgres",
-    "password":"123456",
-    "host":"localhost",
-    "port":"5432",
-    "database":"postgres"
-  },
   "gpt": {
-    "api_key": "sk-9GWkjOf1MOqzkY6RF567217994Fe494bB02eF99c241b42Dd",
+    "api_key": "sk-9GWkjOf1MOqzkY6RF5xxx",
     "base_url": "https://api.vveai.com/v1",
     "model": "gpt-4o-mini",
     "temperature": 0.7,
     "max_tokens": 10000
+  },
+  "db": {
+    "db": "postgresql",
+    "user": "postgres",
+    "password": "123456",
+    "host": "localhost",
+    "port": 5432,
+    "database": "postgres"
   },
   "bot": {
     "response_timeout": 30,

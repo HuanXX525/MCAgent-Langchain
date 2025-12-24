@@ -18,6 +18,7 @@ from config import CONFIG, DB_URL
 from api.connectionManager import get_connection_manager
 from agent.Agent import MinecraftAgent, get_minecraft_agent, set_minecraft_agent
 from logger import logger
+
 # main.py（最顶部！）
 
 
@@ -30,6 +31,7 @@ async def handle_websocket_data(data: Dict[str, Any], currentWebSocket: WebSocke
         }
     }
     """
+    logger.info(f"接收到的数据: {json.dumps(data)}")
     data_type = data.get("type") or WebSockekProtocol.DEFAULT.value
     data_data = data.get("data") or {}
     if data_type == WebSockekProtocol.CHAT.value:
@@ -112,7 +114,7 @@ app.add_middleware(
 async def get_config():
     """读配置文件"""
     try:
-        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.json')
+        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'configdev.json')
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
         return config
@@ -123,7 +125,7 @@ async def get_config():
 async def save_config(config: dict):
     """写配置文件"""
     try:
-        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.json')
+        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'configdev.json')
         with open(config_path, 'w', encoding='utf-8') as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
         return {"success": True, "message": "配置已保存"}

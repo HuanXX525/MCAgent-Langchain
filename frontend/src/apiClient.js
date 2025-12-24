@@ -1,9 +1,10 @@
-const axios = require('axios');
 const WebSocket = require('ws');
-const ActionManager = require('./action/actionManager')
-class APIClient {
+// const ActionManager = require('./action/actionManager')
+const { EventEmitter } = require('events'); // 引入 Node.js 原生事件触发器
+class APIClient extends EventEmitter {
   static instance = null;
   constructor(config, bot) {
+    super();
     if (APIClient.instance) {
       return APIClient.instance;
     }
@@ -86,15 +87,27 @@ class APIClient {
     switch (message.type) {
       case "chat":
         // 聊天消息，转发给玩家，在我的世界聊天框显示出来
-        this.bot.chat(message.data.message)
+        this.bot.chat(message.data.message);
         break;
       case "action":
-        const data = message.data;
-        ActionManager.instance.executeAction(data.action, data.action_id, data.args);
-      
+        // 【关键改动】不再直接调用 ActionManager
+        // 而是发出一个名为 'onAction' 的事件，把数据传出去
+        this.emit("onAction", message.data);
+        break;
       // 其他的行为控制信息获取请求等等，可以在这里处理
       default:
         console.log("未知消息类型:", message.type);
+    }
+  }
+
+  // 统一的发送方法
+  send(payload) {
+    console.log("进入发送方法")
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      console.log("发送数据:", payload);
+      this.ws.send(JSON.stringify(payload));
+    } else {
+      console.error("发送失败：WebSocket 未连接");
     }
   }
 

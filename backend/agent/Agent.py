@@ -84,12 +84,18 @@ class MinecraftAgent:
         """处理用户消息"""
         try:
             # 使用用户名作为thread_id来区分不同用户的对话
-            config = {"configurable": {"thread_id": username}}
+            # config = {"configurable": {"thread_id": username}}
             async for stream_mode, chunk in self.agent.astream(
                 {"messages": [HumanMessage(content=f"{username}: {message}")]}, 
-                config={"configurable":{"thread_id": SAVE_SLOT + BOTNAME}},
+                config={
+                    "configurable":{
+                        "thread_id": SAVE_SLOT + BOTNAME,
+                        "context": Context(websocket=websocket, player_name=username)
+                        }
+                    },
                 stream_mode=["custom", "updates"],
-                context=Context(websocket=websocket, player_name=username)):
+                # context=Context(websocket=websocket, player_name=username)
+                ):
                 _ = await self.process_stream_chunk(stream_mode, chunk, websocket)
         except Exception as e:
             print(f"Agent处理过程中出现错误: {e}")

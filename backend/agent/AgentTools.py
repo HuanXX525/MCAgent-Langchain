@@ -6,7 +6,7 @@ from fastapi import WebSocket
 from langchain.tools import tool, ToolRuntime
 from langgraph.config import get_stream_writer
 from pydantic import BaseModel, Field
-
+from langchain_core.runnables import RunnableConfig
 
 from api.connectionManager import get_connection_manager
 from api.WebSockekProtocol import WebSockekProtocol
@@ -17,10 +17,10 @@ class Context():
     websocket : WebSocket
     player_name : str
 
-async def send_tool_args(reply: str, tool_runtime:ToolRuntime[Context], args:dict, action_name:str):
+async def send_tool_args(reply: str, args:dict, action_name:str, context: Context):
     writer = get_stream_writer()
     writer(reply)
-    websocket = tool_runtime.context.websocket
+    websocket = context.websocket
     action_id = str(uuid.uuid4())
     # 创建一个 Future 用于等待前端响应
     future = asyncio.Future()
@@ -60,21 +60,26 @@ class followPlayerOnceInput(BaseModel):
     replyToUserBeforeTool: str
     nearByDistance : int = Field(description="最终跟随到玩家附近的距离", default = 1)
 @tool(args_schema=followPlayerOnceInput)
-async def followPlayerOnce(tool_runtime: Annotated[ToolRuntime[Context], InjectedToolArg], replyToUserBeforeTool: str, nearByDistance: int = 1) -> str:
+async def followPlayerOnce(config: RunnableConfig, replyToUserBeforeTool: str, nearByDistance: int = 1) -> str:
     '''
     控制你在游戏中是否跟随玩家
     '''
-    args = {
-        "nearByDistance" : nearByDistance,
-        "playerName" : tool_runtime.context.player_name
-    }
-    data = await send_tool_args(replyToUserBeforeTool, tool_runtime, args, "follow_player")
-    if isinstance(data, str):
-        # print(data)
-        return data
+    context = config.get("configurable", {}).get("context")
+    if (context and isinstance(context, Context)):
+
+        args = {
+            "nearByDistance" : nearByDistance,
+            "playerName" : context.player_name
+        }
+        data = await send_tool_args(replyToUserBeforeTool, args, "followPlayerOnce", context)
+        if isinstance(data, str):
+            # print(data)
+            return data
+        else:
+            # print(data.message)
+            return data.message
     else:
-        # print(data.message)
-        return data.message
+        return "没有找到上下文信息，停止执行"
 
 ############## 设置跟随玩家状态工具 ##############
 
