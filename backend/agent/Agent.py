@@ -1,23 +1,22 @@
 from fastapi import WebSocket
 from langchain_openai import ChatOpenAI
-from typing import Any
+from typing import Any, cast
 # from api.websocket import send_chat
-from langgraph.checkpoint.postgres import PostgresSaver 
 from typing import Any
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from langchain.messages import AIMessage, HumanMessage
-
-
+from langchain.agents.middleware import SummarizationMiddleware, AgentMiddleware
+from langchain.agents import AgentState
 from .AgentTools import Context, tools
 
-from config import API_KEY, BASE_URL, BOTNAME, MODEL, SAVE_SLOT
+from config import API_KEY, BASE_URL, BOTNAME, MAX_TOKENS, MODEL, SAVE_SLOT, RESERVE_MESSAGES, CHARACTER
 from typing import Any
 from fastapi import WebSocket
 
 from api.WebSockekProtocol import WebSockekProtocol
 from logger import logger
-
+from agent.middleware import MinecraftStateMiddleware
 
 
 async def send_chat(text: str, webSocket: WebSocket):
@@ -51,10 +50,29 @@ class MinecraftAgent:
         )
         self.checkpointer = checkpointer
         # 初始化LLM
-        prompt = "你是我的世界中的一个玩家实体，作为玩家的伙伴，你需要根据玩家的输入做出合适的选择。如果必要，使用工具函数可以让你与游戏世界交互"
+        prompt = f'''
+### 你的设定
+你是我的世界中的一个玩家实体，作为玩家的伙伴，你需要根据玩家的输入做出合适的选择。如果必要，使用工具函数可以让你与游戏世界交互
+### 角色描述
+{CHARACTER}
+'''
         
         # 短期记忆、系统提示、工具集、模型
-        self.agent = create_agent(self.model, tools, system_prompt=prompt, checkpointer=self.checkpointer)
+        self.agent = create_agent(self.model, tools, 
+                                  system_prompt=prompt, 
+                                  checkpointer=self.checkpointer,
+                                  middleware=[
+                                    #   自动历史记录总结
+                                        cast(AgentMiddleware[AgentState, Context], SummarizationMiddleware(
+                                            model=self.model,
+                                            trigger=("tokens", MAX_TOKENS),
+                                            keep=("messages", RESERVE_MESSAGES),
+                                        )),
+                                        # 获取游戏状态
+                                        cast(AgentMiddleware[AgentState, Context], MinecraftStateMiddleware(timeout=100))
+                                    ],
+                                    context_schema=Context
+                                    )
     async def process_stream_chunk(self, stream_mode : str | Any, chunk : str | Any, web_socket:WebSocket):
         '''
         根据不同的流式回复模式处理流式回复的内容
@@ -86,15 +104,15 @@ class MinecraftAgent:
             # 使用用户名作为thread_id来区分不同用户的对话
             # config = {"configurable": {"thread_id": username}}
             async for stream_mode, chunk in self.agent.astream(
-                {"messages": [HumanMessage(content=f"{username}: {message}")]}, 
-                config={
+                input = {"messages": [HumanMessage(content=f"{username}: {message}")]}, 
+                config = {
                     "configurable":{
                         "thread_id": SAVE_SLOT + BOTNAME,
                         "context": Context(websocket=websocket, player_name=username)
                         }
                     },
-                stream_mode=["custom", "updates"],
-                # context=Context(websocket=websocket, player_name=username)
+                stream_mode = ["custom", "updates"],
+                context=Context(websocket=websocket, player_name=username)
                 ):
                 _ = await self.process_stream_chunk(stream_mode, chunk, websocket)
         except Exception as e:

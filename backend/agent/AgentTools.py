@@ -12,6 +12,8 @@ from api.connectionManager import get_connection_manager
 from api.WebSockekProtocol import WebSockekProtocol
 from logger import logger
 
+# 工具执行上下文定义，可随着需求拓展，若更改请在Agent.py的astream处进行相应的初始化
+# 在工具中使用config获取框架自动注入的工具执行上下文
 @dataclass
 class Context():
     websocket : WebSocket
@@ -58,14 +60,14 @@ async def send_tool_args(reply: str, args:dict, action_name:str, context: Contex
 
 from langchain_core.tools import InjectedToolArg # 导入注入标记
 
-############## 设置跟随玩家状态工具 ##############
+############## 单次到玩家附近 ##############
 class followPlayerOnceInput(BaseModel):
     replyToUserBeforeTool: str
     nearByDistance : int = Field(description="最终跟随到玩家附近的距离", default = 1)
 @tool(args_schema=followPlayerOnceInput)
 async def followPlayerOnce(config: RunnableConfig, replyToUserBeforeTool: str, nearByDistance: int = 1) -> str:
     '''
-    控制你在游戏中是否跟随玩家
+    走到玩家附近
     '''
     context = config.get("configurable", {}).get("context")
     if (context and isinstance(context, Context)):
@@ -84,8 +86,38 @@ async def followPlayerOnce(config: RunnableConfig, replyToUserBeforeTool: str, n
     else:
         return "没有找到上下文信息，停止执行"
 
-############## 设置跟随玩家状态工具 ##############
+############## 单次到玩家附近 ##############
 
+############## 控制是否持续跟随玩家 ##############
+class followPlayerContinouslyToggleInput(BaseModel):
+    replyToUserBeforeTool: str
+    follow : bool = Field(description="True为开启，False为关闭")
+    nearByDistance : int = Field(description="最终跟随到玩家附近的距离", default = 1)
+@tool(args_schema=followPlayerContinouslyToggleInput)
+async def followPlayerContinouslyToggle(config: RunnableConfig, replyToUserBeforeTool: str,follow : bool, nearByDistance: int = 1) -> str:
+    '''
+    控制你在游戏中是否持续跟随玩家，无需其他操作停止跟随玩家
+    '''
+    context = config.get("configurable", {}).get("context")
+    if (context and isinstance(context, Context)):
+
+        args = {
+            "nearByDistance" : nearByDistance,
+            "playerName" : context.player_name,
+            "follow" : follow
+        }
+        data = await send_tool_args(replyToUserBeforeTool, args, "followPlayerContinouslyToggle", context)
+        if isinstance(data, str):
+            # print(data)
+            return data
+        else:
+            # print(data.message)
+            return data.message
+    else:
+        return "没有找到上下文信息，停止执行"
+
+
+############## 控制是否持续跟随玩家 ##############
 # @tool
 # def get_bag_items(runtime:ToolRuntime) -> list[str]:
 #     '''获取你背包里的所有物品'''
@@ -101,5 +133,5 @@ async def followPlayerOnce(config: RunnableConfig, replyToUserBeforeTool: str, n
 #     return f"{item} was thrown"
 
 # tools = [follow_player, get_bag_items, throw_item]
-tools = [followPlayerOnce]
+tools = [followPlayerOnce, followPlayerContinouslyToggle]
 

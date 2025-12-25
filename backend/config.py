@@ -14,8 +14,13 @@ CONFIG = load_config()
 API_KEY = CONFIG['gpt']['api_key']
 BASE_URL = CONFIG['gpt']['base_url']
 MODEL = CONFIG['gpt']['model']
+MAX_TOKENS = CONFIG['gpt']['max_tokens']
+RESERVE_MESSAGES = CONFIG['gpt']['reserve_messages']
 
 DB_URL = f"{CONFIG['db']['db']}://{CONFIG['db']['user']}:{CONFIG['db']['password']}@{CONFIG['db']['host']}:{CONFIG['db']['port']}/{CONFIG['db']['database']}"
 
 SAVE_SLOT = CONFIG['saveslot']
 BOTNAME = CONFIG['name']
+CHARACTER = CONFIG['character']
+
+

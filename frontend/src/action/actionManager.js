@@ -1,4 +1,4 @@
-const { followPlayerOnce } = require('./action');
+const { followPlayerOnce, followPlayerContinouslyToggle } = require('./action');
 const APIClient = require('../apiClient');
 
 class ActionManager {
@@ -57,5 +57,6 @@ class ActionManager {
 new ActionManager();
 
 ActionManager.instance.registeAction("followPlayerOnce", followPlayerOnce);
+ActionManager.instance.registeAction("followPlayerContinouslyToggle", followPlayerContinouslyToggle);
 
 module.exports = ActionManager;

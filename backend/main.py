@@ -34,6 +34,8 @@ async def handle_websocket_data(data: Dict[str, Any], currentWebSocket: WebSocke
     logger.info(f"接收到的数据: {json.dumps(data)}")
     data_type = data.get("type") or WebSockekProtocol.DEFAULT.value
     data_data = data.get("data") or {}
+    manager = get_connection_manager()
+
     if data_type == WebSockekProtocol.CHAT.value:
         '''
         {
@@ -62,9 +64,18 @@ async def handle_websocket_data(data: Dict[str, Any], currentWebSocket: WebSocke
         message = data_data.get("message") or ""
         action_id = data_data.get("action_id") or ""
         logger.info(f"工具 {action_name}执行结果 {message}")
-        manager = get_connection_manager()
         future = manager.action_future.pop(action_id)
         future.set_result({"message": message})
+    elif data_type == WebSockekProtocol.STATE.value:
+        '''
+        {
+            "weather": "晴朗",
+        }
+        '''
+        weather = data_data.get("weather") or "null"
+        action_id = data_data.get("action_id") or ""
+        future = manager.action_future.pop(action_id)
+        future.set_result({"weather": weather})
 
     elif data_type == WebSockekProtocol.DEFAULT.value:
         print("未知消息类型")

@@ -6,6 +6,7 @@
     "auth": "offline"
   },
   "name": "Alice",
+  "character":"你的名字是爱丽丝",
   "saveslot": "default_save_slot",
   "backend": {
     "host": "localhost",
